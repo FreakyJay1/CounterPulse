@@ -8,17 +8,19 @@ const ProductEntry = () => {
   const [price, setPrice] = useState('');
   const [barcode, setBarcode] = useState('');
   const [quantity, setQuantity] = useState('');
+  const [costPrice, setCostPrice] = useState('');
   const addProduct = useProductStore((state) => state.addProduct);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !category || !price || !quantity) return;
-    await addProduct({ name, category, price: parseFloat(price), barcode, quantity: parseInt(quantity, 10) });
+    if (!name || !category || !price || !quantity || !costPrice) return;
+    await addProduct({ name, category, price: parseFloat(price), costPrice: parseFloat(costPrice), barcode, quantity: parseInt(quantity, 10) });
     setName('');
     setCategory('');
     setPrice('');
     setBarcode('');
     setQuantity('');
+    setCostPrice('');
   };
 
   return (
@@ -46,6 +48,12 @@ const ProductEntry = () => {
         placeholder="Quantity"
         value={quantity}
         onChange={(e) => setQuantity(e.target.value)}
+      />
+      <input
+        type="number"
+        placeholder="Cost Price"
+        value={costPrice}
+        onChange={(e) => setCostPrice(e.target.value)}
       />
       <input
         type="text"
