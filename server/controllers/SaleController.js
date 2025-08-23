@@ -64,3 +64,44 @@ exports.deleteSale = async (req, res) => {
   }
 };
 
+// --- SALES REPORTING ENDPOINTS ---
+
+// Get total sales amount
+exports.getTotalSales = async (req, res) => {
+  try {
+    const sales = await Sale.findAll();
+    const total = sales.reduce((sum, s) => sum + (s.total || 0), 0);
+    res.json({ total });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get sales by product
+exports.getSalesByProduct = async (req, res) => {
+  try {
+    const sales = await Sale.findAll();
+    const byProduct = {};
+    sales.forEach(s => {
+      byProduct[s.productId] = (byProduct[s.productId] || 0) + (s.total || 0);
+    });
+    res.json(byProduct);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get sales in a date range
+exports.getSalesByDateRange = async (req, res) => {
+  try {
+    const { start, end } = req.query;
+    const where = {};
+    if (start && end) {
+      where.createdAt = { $gte: new Date(start), $lte: new Date(end) };
+    }
+    const sales = await Sale.findAll({ where });
+    res.json(sales);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
