@@ -4,17 +4,21 @@ import BarcodeScanner from './BarcodeScanner';
 
 const ProductEntry = () => {
   const [name, setName] = useState('');
+  const [category, setCategory] = useState('');
   const [price, setPrice] = useState('');
   const [barcode, setBarcode] = useState('');
+  const [quantity, setQuantity] = useState('');
   const addProduct = useProductStore((state) => state.addProduct);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !price) return;
-    addProduct({ id: barcode || Date.now(), name, price: parseFloat(price), barcode });
+    if (!name || !category || !price || !quantity) return;
+    await addProduct({ name, category, price: parseFloat(price), barcode, quantity: parseInt(quantity, 10) });
     setName('');
+    setCategory('');
     setPrice('');
     setBarcode('');
+    setQuantity('');
   };
 
   return (
@@ -26,10 +30,22 @@ const ProductEntry = () => {
         onChange={(e) => setName(e.target.value)}
       />
       <input
+        type="text"
+        placeholder="Category"
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+      />
+      <input
         type="number"
         placeholder="Price"
         value={price}
         onChange={(e) => setPrice(e.target.value)}
+      />
+      <input
+        type="number"
+        placeholder="Quantity"
+        value={quantity}
+        onChange={(e) => setQuantity(e.target.value)}
       />
       <input
         type="text"
