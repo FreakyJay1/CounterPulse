@@ -20,8 +20,7 @@ app.use('/api/sales', saleRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/sync', syncRoutes);
 
-// Sync database models
-sequelize.sync().then(() => {
+sequelize.sync({ alter: true }).then(() => {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

@@ -1,7 +1,6 @@
 const Sale = require('../models/Sale');
 const Product = require('../models/Product');
 
-// Get all sales
 exports.getAllSales = async (req, res) => {
   try {
     const sales = await Sale.findAll();
@@ -11,7 +10,6 @@ exports.getAllSales = async (req, res) => {
   }
 };
 
-// Get a single sale by ID
 exports.getSaleById = async (req, res) => {
   try {
     const sale = await Sale.findByPk(req.params.id);
@@ -22,12 +20,10 @@ exports.getSaleById = async (req, res) => {
   }
 };
 
-// Create a new sale
 exports.createSale = async (req, res) => {
   try {
     const { productId, quantity, total } = req.body;
     const sale = await Sale.create({ productId, quantity, total });
-    // Update product quantity
     const product = await Product.findByPk(productId);
     if (product) {
       product.quantity -= quantity;
@@ -39,7 +35,6 @@ exports.createSale = async (req, res) => {
   }
 };
 
-// Update a sale
 exports.updateSale = async (req, res) => {
   try {
     const { productId, quantity, total } = req.body;
@@ -52,7 +47,6 @@ exports.updateSale = async (req, res) => {
   }
 };
 
-// Delete a sale
 exports.deleteSale = async (req, res) => {
   try {
     const sale = await Sale.findByPk(req.params.id);
@@ -64,26 +58,26 @@ exports.deleteSale = async (req, res) => {
   }
 };
 
-// --- SALES REPORTING ENDPOINTS ---
-
-// Get total sales amount
 exports.getTotalSales = async (req, res) => {
   try {
     const sales = await Sale.findAll();
-    const total = sales.reduce((sum, s) => sum + (s.total || 0), 0);
-    res.json({ total });
+    const total = sales.reduce((sum, s) => sum + (Number(s.total) || 0), 0);
+    res.json({ total: Number(total) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Get sales by product
 exports.getSalesByProduct = async (req, res) => {
   try {
     const sales = await Sale.findAll();
     const byProduct = {};
     sales.forEach(s => {
-      byProduct[s.productId] = (byProduct[s.productId] || 0) + (s.total || 0);
+      const t = Number(s.total) || 0;
+      byProduct[s.productId] = (byProduct[s.productId] || 0) + t;
+    });
+    Object.keys(byProduct).forEach(pid => {
+      byProduct[pid] = Number(byProduct[pid]);
     });
     res.json(byProduct);
   } catch (err) {
@@ -91,7 +85,6 @@ exports.getSalesByProduct = async (req, res) => {
   }
 };
 
-// Get sales in a date range
 exports.getSalesByDateRange = async (req, res) => {
   try {
     const { start, end } = req.query;
