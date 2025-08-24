@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState } from 'react';
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-  const [role, setRole] = useState(null); // null until login
+  const [role, setRole] = useState(null);
   const [token, setToken] = useState(null);
   const login = (jwt, userRole) => {
     setToken(jwt);
@@ -17,7 +17,6 @@ export const UserProvider = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
   };
-  // On mount, restore from localStorage
   React.useEffect(() => {
     const t = localStorage.getItem('token');
     const r = localStorage.getItem('role');

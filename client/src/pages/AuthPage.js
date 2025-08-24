@@ -21,7 +21,6 @@ const AuthPage = ({ onAuth }) => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Auth failed');
-      // For login, backend returns { token }, for register, return { token, role }
       onAuth(data.token, data.role || role);
     } catch (err) {
       setError(err.message);
@@ -30,22 +29,31 @@ const AuthPage = ({ onAuth }) => {
 
   return (
     <div style={{ maxWidth: 400, margin: '2rem auto', padding: 20, border: '1px solid #ccc', borderRadius: 8 }}>
-      <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
+      <h2>{isLogin ? 'Login' : 'Register'}</h2>
       <form onSubmit={handleSubmit}>
-        <input type="text" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} required />
-        <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
+        <div>
+          <label>Username:</label>
+          <input value={username} onChange={e => setUsername(e.target.value)} required />
+        </div>
+        <div>
+          <label>Password:</label>
+          <input type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+        </div>
         {!isLogin && (
-          <select value={role} onChange={e => setRole(e.target.value)} required>
-            <option value="owner">Shop Owner</option>
-            <option value="assistant">Shop Assistant</option>
-          </select>
+          <div>
+            <label>Role:</label>
+            <select value={role} onChange={e => setRole(e.target.value)}>
+              <option value="owner">Owner</option>
+              <option value="staff">Staff</option>
+            </select>
+          </div>
         )}
-        <button type="submit">{isLogin ? 'Login' : 'Sign Up'}</button>
+        {error && <div style={{ color: 'red', marginTop: 10 }}>{error}</div>}
+        <button type="submit">{isLogin ? 'Login' : 'Register'}</button>
       </form>
-      <button onClick={() => setIsLogin(!isLogin)} style={{ marginTop: 8 }}>
-        {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Login'}
+      <button onClick={() => setIsLogin(!isLogin)} style={{ marginTop: 10 }}>
+        {isLogin ? 'Need to register?' : 'Already have an account? Login'}
       </button>
-      {error && <div style={{ color: 'red' }}>{error}</div>}
     </div>
   );
 };
