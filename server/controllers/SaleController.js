@@ -3,8 +3,15 @@ const Product = require('../models/Product');
 
 exports.getAllSales = async (req, res) => {
   try {
-    const sales = await Sale.findAll();
-    res.json(sales);
+    const sales = await Sale.findAll({ include: [{ model: Product, attributes: ['name'] }] });
+    const salesWithProductName = sales.map(sale => ({
+      id: sale.id,
+      productName: sale.Product ? sale.Product.name : sale.productId,
+      quantity: sale.quantity,
+      total: sale.total,
+      date: sale.date
+    }));
+    res.json(salesWithProductName);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -23,13 +30,40 @@ exports.getSaleById = async (req, res) => {
 exports.createSale = async (req, res) => {
   try {
     const { productId, quantity, total } = req.body;
-    const sale = await Sale.create({ productId, quantity, total });
-    const product = await Product.findByPk(productId);
-    if (product) {
-      product.quantity -= quantity;
-      await product.save();
+    const sequelize = require('../models/index');
+    let saleCreated = null;
+    try {
+      await sequelize.transaction(async (t) => {
+        const productForUpdate = await Product.findByPk(productId, { lock: t.LOCK.UPDATE, transaction: t });
+        console.log('[SALE] Fetched product for update:', productForUpdate ? productForUpdate.id : null, 'Current qty:', productForUpdate ? productForUpdate.quantity : null);
+        if (!productForUpdate) {
+          throw new Error('Product not found');
+        }
+        if (!Number.isInteger(quantity) || quantity <= 0) {
+          throw new Error('Invalid sale quantity');
+        }
+        if (productForUpdate.quantity < quantity) {
+          console.log('[SALE] Not enough stock. Requested:', quantity, 'Available:', productForUpdate.quantity);
+          throw new Error(`Not enough stock to complete the sale. Available: ${productForUpdate.quantity}`);
+        }
+        saleCreated = await Sale.create({ productId, quantity, total }, { transaction: t });
+        productForUpdate.quantity -= quantity;
+        await productForUpdate.save({ transaction: t });
+        console.log('[SALE] Sale created. New product qty:', productForUpdate.quantity);
+      });
+    } catch (err) {
+      if (err.name === 'SequelizeDatabaseError' || err.name === 'SequelizeValidationError') {
+        console.log('[SALE] DB constraint error:', err.message);
+        return res.status(400).json({ error: 'Database constraint error: ' + err.message });
+      }
+      console.log('[SALE] Transaction error:', err.message);
+      return res.status(400).json({ error: err.message });
     }
-    res.status(201).json(sale);
+    if (saleCreated) {
+      return res.status(201).json(saleCreated);
+    } else {
+      return res.status(400).json({ error: 'Sale could not be completed.' });
+    }
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -70,30 +104,14 @@ exports.getTotalSales = async (req, res) => {
 
 exports.getSalesByProduct = async (req, res) => {
   try {
-    const sales = await Sale.findAll();
+    const sales = await Sale.findAll({ include: [{ model: Product, attributes: ['name'] }] });
     const byProduct = {};
     sales.forEach(s => {
       const t = Number(s.total) || 0;
-      byProduct[s.productId] = (byProduct[s.productId] || 0) + t;
-    });
-    Object.keys(byProduct).forEach(pid => {
-      byProduct[pid] = Number(byProduct[pid]);
+      const name = s.Product ? s.Product.name : s.productId;
+      byProduct[name] = (byProduct[name] || 0) + t;
     });
     res.json(byProduct);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-exports.getSalesByDateRange = async (req, res) => {
-  try {
-    const { start, end } = req.query;
-    const where = {};
-    if (start && end) {
-      where.createdAt = { $gte: new Date(start), $lte: new Date(end) };
-    }
-    const sales = await Sale.findAll({ where });
-    res.json(sales);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

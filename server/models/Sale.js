@@ -5,6 +5,10 @@ const Sale = sequelize.define('Sale', {
   productId: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    references: {
+      model: 'Products',
+      key: 'id',
+    },
   },
   quantity: {
     type: DataTypes.INTEGER,
@@ -21,5 +25,7 @@ const Sale = sequelize.define('Sale', {
   },
 });
 
-module.exports = Sale;
+const Product = require('./Product');
+Sale.belongsTo(Product, { foreignKey: 'productId', onDelete: 'CASCADE' });
 
+module.exports = Sale;

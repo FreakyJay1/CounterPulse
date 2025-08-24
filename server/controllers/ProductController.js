@@ -31,6 +31,7 @@ exports.createProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
+    console.log('Received update for product:', req.params.id, req.body);
     const { name, category, price, barcode, quantity, costPrice } = req.body;
     const product = await Product.findByPk(req.params.id);
     if (!product) return res.status(404).json({ error: 'Product not found' });
@@ -47,6 +48,24 @@ exports.deleteProduct = async (req, res) => {
     if (!product) return res.status(404).json({ error: 'Product not found' });
     await product.destroy();
     res.json({ message: 'Product deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.searchProducts = async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) return res.status(400).json({ error: 'Query parameter is required' });
+    const products = await Product.findAll({
+      where: {
+        [Product.sequelize.Op.or]: [
+          { name: { [Product.sequelize.Op.iLike]: `%${query}%` } },
+          { barcode: { [Product.sequelize.Op.iLike]: `%${query}%` } }
+        ]
+      }
+    });
+    res.json(products);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
