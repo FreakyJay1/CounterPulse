@@ -27,6 +27,14 @@ const useProductStore = create((set) => ({
     await axios.delete(`${API_URL}/${id}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
     set((state) => ({ products: state.products.filter((p) => p.id !== id) }));
   },
+  searchProducts: async (query) => {
+    const token = localStorage.getItem('token');
+    const res = await axios.get(`${API_URL}/search`, {
+      params: { query },
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+    set({ products: res.data });
+  },
 }));
 
 export default useProductStore;

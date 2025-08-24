@@ -15,7 +15,7 @@ const SalesList = () => {
       <ul>
         {sales.map(sale => (
           <li key={sale.id}>
-            Product ID: {sale.productId} | Qty: {sale.quantity} | Total: ${sale.total} | Date: {new Date(sale.createdAt).toLocaleString()}
+            Product: {sale.productName || sale.productId} | Qty: {sale.quantity} | Total: ${sale.total} | Date: {new Date(sale.createdAt).toLocaleString()}
           </li>
         ))}
       </ul>
@@ -24,4 +24,3 @@ const SalesList = () => {
 };
 
 export default SalesList;
-

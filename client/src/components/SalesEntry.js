@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useFeedback } from '../utils/FeedbackContext';
 
 const SalesEntry = ({ products, onSaleLogged }) => {
   const [productId, setProductId] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [total, setTotal] = useState(0);
+  const { setMessage } = useFeedback();
 
   useEffect(() => {
     const selected = products.find(p => p.id === Number(productId));
@@ -17,15 +19,21 @@ const SalesEntry = ({ products, onSaleLogged }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!productId || quantity < 1) return;
-    await fetch('http://localhost:5000/api/sales', {
+    const res = await fetch('http://localhost:5000/api/sales', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ productId: Number(productId), quantity, total })
     });
-    setProductId('');
-    setQuantity(1);
-    setTotal(0);
-    if (onSaleLogged) onSaleLogged();
+    if (res.ok) {
+      setProductId('');
+      setQuantity(1);
+      setTotal(0);
+      setMessage('Sale logged successfully!');
+      if (onSaleLogged) onSaleLogged();
+    } else {
+      const data = await res.json();
+      setMessage(data.error || 'Failed to log sale.');
+    }
   };
 
   return (
@@ -45,4 +53,3 @@ const SalesEntry = ({ products, onSaleLogged }) => {
 };
 
 export default SalesEntry;
-
