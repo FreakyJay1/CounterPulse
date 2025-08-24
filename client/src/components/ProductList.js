@@ -73,8 +73,8 @@ const ProductList = ({ setMessage }) => {
       <ul>
         {products.map((product) => (
           <li key={product.id}>
-            {product.name} ({product.category}) - ${product.price.toFixed(2)} | Qty: {product.quantity}
-            {barcode && <span style={{ color: 'green', marginLeft: 8 }}>Price: ${product.price.toFixed(2)}</span>}
+            {product.name} ({product.category}) - R{product.price.toFixed(2)} | Qty: {product.quantity}
+            {barcode && <span style={{ color: 'green', marginLeft: 8 }}>Price: R{product.price.toFixed(2)}</span>}
             {role === 'owner' && (
               <>
                 <button onClick={() => setEditingProduct(product)}>Edit</button>

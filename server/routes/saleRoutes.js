@@ -10,6 +10,5 @@ router.put('/:id', SaleController.updateSale);
 router.delete('/:id', SaleController.deleteSale);
 router.get('/report/total', auth(['owner']), SaleController.getTotalSales);
 router.get('/report/by-product', auth(['owner']), SaleController.getSalesByProduct);
-router.get('/report/by-date', auth(['owner']), SaleController.getSalesByDateRange);
 
 module.exports = router;

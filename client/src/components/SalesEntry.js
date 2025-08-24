@@ -42,11 +42,11 @@ const SalesEntry = ({ products, onSaleLogged }) => {
       <select value={productId} onChange={e => setProductId(e.target.value)} required>
         <option value=''>Select Product</option>
         {products.map(p => (
-          <option key={p.id} value={p.id}>{p.name} (${p.price})</option>
+          <option key={p.id} value={p.id}>{p.name} (R{p.price})</option>
         ))}
       </select>
       <input type='number' min='1' value={quantity} onChange={e => setQuantity(Number(e.target.value))} required />
-      <span>Total: ${total}</span>
+      <span>Total: R{total}</span>
       <button type='submit'>Log Sale</button>
     </form>
   );

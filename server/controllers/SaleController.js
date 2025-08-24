@@ -107,11 +107,20 @@ exports.getSalesByProduct = async (req, res) => {
     const sales = await Sale.findAll({ include: [{ model: Product, attributes: ['name'] }] });
     const byProduct = {};
     sales.forEach(s => {
-      const t = Number(s.total) || 0;
       const name = s.Product ? s.Product.name : s.productId;
-      byProduct[name] = (byProduct[name] || 0) + t;
+      if (!byProduct[name]) {
+        byProduct[name] = { name, quantity: 0, total: 0, count: 0 };
+      }
+      byProduct[name].quantity += Number(s.quantity) || 0;
+      byProduct[name].total += Number(s.total) || 0;
+      byProduct[name].count += 1;
     });
-    res.json(byProduct);
+    // Add average price per product
+    const result = Object.values(byProduct).map(p => ({
+      ...p,
+      average: p.quantity > 0 ? (p.total / p.quantity) : 0
+    }));
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -22,13 +22,13 @@ exports.generateShopReport = async (req, res) => {
 
     doc.fontSize(14).text('Inventory:', { underline: true });
     products.forEach(p => {
-      doc.fontSize(10).text(`Name: ${p.name} | Category: ${p.category} | Price: ${p.price} | Barcode: ${p.barcode || '-'} | Quantity: ${p.quantity}`);
+      doc.fontSize(10).text(`Name: ${p.name} | Category: ${p.category} | Price: R${p.price} | Barcode: ${p.barcode || '-'} | Quantity: ${p.quantity}`);
     });
     doc.moveDown();
 
     doc.fontSize(14).text('Sales:', { underline: true });
     sales.forEach(s => {
-      doc.fontSize(10).text(`Product ID: ${s.productId} | Quantity: ${s.quantity} | Total: ${s.total} | Date: ${s.date.toISOString().slice(0,10)}`);
+      doc.fontSize(10).text(`Product ID: ${s.productId} | Quantity: ${s.quantity} | Total: R${s.total} | Date: ${s.date.toISOString().slice(0,10)}`);
     });
 
     doc.end();
