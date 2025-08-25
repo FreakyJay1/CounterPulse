@@ -6,6 +6,7 @@ const userRoutes = require('./routes/userRoutes');
 const syncRoutes = require('./routes/syncRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const sequelize = require('./models');
+const initDb = require('./utils/initDb');
 
 const app = express();
 
@@ -22,9 +23,11 @@ app.use('/api/users', userRoutes);
 app.use('/api/sync', syncRoutes);
 app.use('/api/report', reportRoutes);
 
-sequelize.sync({ alter: true }).then(() => {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+initDb().then(() => {
+  sequelize.sync({ alter: true }).then(() => {
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
   });
 });
