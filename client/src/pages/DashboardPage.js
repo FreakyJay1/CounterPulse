@@ -2,7 +2,7 @@ import React from 'react';
 
 const DashboardPage = () => {
   return (
-    <div style={{ maxWidth: 600, margin: '0 auto', padding: '40px 24px', background: '#fff', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: '2px 12px', background: '#fff', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
       <h1 style={{ fontSize: '2rem', marginBottom: 12, color: '#1a2236' }}>Welcome to CounterPulse</h1>
       <h2 style={{ color: '#28304a', marginTop: 24, marginBottom: 8, fontSize: '1.2rem' }}>The Problem</h2>
       <p style={{ fontSize: '1rem', color: '#333', lineHeight: 1.6, marginBottom: 0 }}>

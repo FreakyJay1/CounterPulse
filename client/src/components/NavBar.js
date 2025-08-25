@@ -2,8 +2,7 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../utils/UserContext';
 import './NavBar.css';
-import logo from '../assets/company-logo.png'; // Placeholder, add your logo here
-import profilePlaceholder from '../assets/profile-placeholder.png'; // Placeholder, add your profile image here
+import logo from '../assets/counterpulse.png';
 
 const NavBar = () => {
   const { token, role, logout } = useUser();
@@ -38,7 +37,7 @@ const NavBar = () => {
       </ul>
       <div className="navbar-profile-section">
         <img
-          src={profilePlaceholder}
+          src={logo}
           alt="Profile"
           className="navbar-profile"
         />

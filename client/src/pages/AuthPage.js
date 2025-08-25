@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useFeedback } from '../utils/FeedbackContext';
 
-const API_URL = 'http://localhost:5000/api/users';
+const API_URL = 'http://192.168.0.108:5000/api/users';
 
 const AuthPage = ({ onAuth }) => {
   const [isLogin, setIsLogin] = useState(true);

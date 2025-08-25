@@ -19,7 +19,7 @@ const SalesEntry = ({ products, onSaleLogged }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!productId || quantity < 1) return;
-    const res = await fetch('http://localhost:5000/api/sales', {
+    const res = await fetch('http://192.168.0.108:5000/api/sales', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ productId: Number(productId), quantity, total })

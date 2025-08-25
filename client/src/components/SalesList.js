@@ -4,7 +4,7 @@ const SalesList = () => {
   const [sales, setSales] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/sales')
+    fetch('http://192.168.0.108:5000/api/sales')
       .then(res => res.json())
       .then(setSales);
   }, []);

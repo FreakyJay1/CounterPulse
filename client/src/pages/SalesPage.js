@@ -10,7 +10,7 @@ const SalesPage = () => {
 
   useEffect(() => {
     fetchProducts();
-    fetch('http://localhost:5000/api/sales', {
+    fetch('http://192.168.0.108:5000/api/sales', {
       headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
     })
       .then(res => res.json())
@@ -28,7 +28,7 @@ const SalesPage = () => {
   });
 
   const handleDownloadReport = () => {
-    window.open('http://localhost:5000/api/report/shop', '_blank');
+    window.open('http://192.168.0.108:5000/api/report/shop', '_blank');
   };
 
   return (
