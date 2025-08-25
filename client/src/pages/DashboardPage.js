@@ -1,91 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 const DashboardPage = () => {
-  const [totalSales, setTotalSales] = useState(0);
-  const [salesByProduct, setSalesByProduct] = useState([]);
-  const [sales, setSales] = useState([]);
-  const [profit, setProfit] = useState(0);
-  const [products, setProducts] = useState([]);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const headers = token ? { Authorization: 'Bearer ' + token } : {};
-    fetch('http://localhost:5000/api/sales/report/total', { headers })
-      .then(res => res.json())
-      .then(data => setTotalSales(data.total || 0));
-    fetch('http://localhost:5000/api/sales/report/by-product', { headers })
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setSalesByProduct(data);
-          setError(null);
-        } else if (data && data.error) {
-          setSalesByProduct([]);
-          if (data.error === 'Invalid token' || data.error === 'Forbidden') {
-            setError('You are not authorized to view this data. Please log in again.');
-          } else {
-            setError(data.error);
-          }
-        } else {
-          setSalesByProduct([]);
-          setError('Unexpected response from server.');
-        }
-      })
-      .catch(() => {
-        setSalesByProduct([]);
-        setError('Failed to fetch sales by product.');
-      });
-    fetch('http://localhost:5000/api/sales', { headers })
-      .then(res => res.json())
-      .then(setSales);
-    fetch('http://localhost:5000/api/products', { headers })
-      .then(res => res.json())
-      .then(setProducts);
-  }, []);
-
-  useEffect(() => {
-    let profitSum = 0;
-    sales.forEach(sale => {
-      const product = products.find(p => p.id === sale.productId);
-      if (product) {
-        profitSum += (sale.total - (product.costPrice * sale.quantity));
-      }
-    });
-    setProfit(profitSum);
-  }, [sales, products]);
-
   return (
-    <div style={{ maxWidth: 600, margin: '2rem auto', padding: 20, border: '1px solid #ccc', borderRadius: 8 }}>
-      <h2>Dashboard</h2>
-      <div>Total Sales: <b>{totalSales}</b></div>
-      <div>Profit: <b>{profit}</b></div>
-      <div style={{ marginTop: 20 }}>
-        <h4>Sales by Product</h4>
-        {error && <div style={{ color: 'red', marginBottom: 10 }}>{error}</div>}
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>
-              <th style={{ border: '1px solid #ccc', padding: 4 }}>Product</th>
-              <th style={{ border: '1px solid #ccc', padding: 4 }}>Quantity Sold</th>
-              <th style={{ border: '1px solid #ccc', padding: 4 }}>Total Revenue</th>
-              <th style={{ border: '1px solid #ccc', padding: 4 }}>Average Price</th>
-              <th style={{ border: '1px solid #ccc', padding: 4 }}>Number of Sales</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(Array.isArray(salesByProduct) ? salesByProduct : []).map(product => (
-              <tr key={product.name}>
-                <td style={{ border: '1px solid #ccc', padding: 4 }}>{product.name}</td>
-                <td style={{ border: '1px solid #ccc', padding: 4 }}>{product.quantity}</td>
-                <td style={{ border: '1px solid #ccc', padding: 4 }}>R{product.total.toFixed(2)}</td>
-                <td style={{ border: '1px solid #ccc', padding: 4 }}>R{product.average.toFixed(2)}</td>
-                <td style={{ border: '1px solid #ccc', padding: 4 }}>{product.count}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: '40px 24px', background: '#fff', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
+      <h1 style={{ fontSize: '2rem', marginBottom: 12, color: '#1a2236' }}>Welcome to CounterPulse</h1>
+      <h2 style={{ color: '#28304a', marginTop: 24, marginBottom: 8, fontSize: '1.2rem' }}>The Problem</h2>
+      <p style={{ fontSize: '1rem', color: '#333', lineHeight: 1.6, marginBottom: 0 }}>
+        Spaza shop owners and informal traders are the backbone of our communities, but they often operate with one hand tied behind their back. Managing stock with memory or scattered notebooks leads to constant uncertainty: popular items run out, disappointing customers and losing sales; perishable goods expire, wasting money; and most importantly, <b>profit is just a guess</b>. This makes sustainable growth nearly impossible.
+      </p>
+      <h2 style={{ color: '#28304a', marginTop: 24, marginBottom: 8, fontSize: '1.2rem' }}>The Solution</h2>
+      <p style={{ fontSize: '1rem', color: '#333', lineHeight: 1.6, marginBottom: 0 }}>
+        <b>CounterPulse</b> is a lightweight, offline-first Progressive Web App (PWA) designed for informal traders. It empowers small business owners to manage inventory, track sales, and see real-time profit—all from a basic smartphone, with or without internet. <br /><br />
+        <b>Key Features:</b>
+        <ul style={{ margin: '10px 0 0 22px', color: '#444', fontSize: '1rem', lineHeight: 1.7 }}>
+          <li>📲 <b>Offline-First Reliability:</b> Works without internet, syncs when online.</li>
+          <li>📈 <b>Simple Profit Dashboard:</b> See profit, revenue, and best-sellers at a glance.</li>
+          <li>🔔 <b>Smart Low-Stock Alerts:</b> Highlights products running low.</li>
+          <li>📦 <b>Barcode Scanning:</b> Fast product lookup and sales logging.</li>
+        </ul>
+      </p>
     </div>
   );
 };

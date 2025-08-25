@@ -1,0 +1,95 @@
+.navbar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #1a2236;
+  color: #fff;
+  width: 240px;
+  min-height: 100vh;
+  padding: 32px 0 16px 0;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+  z-index: 100;
+}
+
+.navbar-logo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.navbar-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.navbar-company {
+  font-size: 1.3rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.navbar-links {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 40px 0;
+  width: 100%;
+}
+
+.navbar-links li {
+  width: 100%;
+  margin: 16px 0;
+  text-align: center;
+}
+
+.navbar-links li a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.1rem;
+  padding: 10px 0;
+  display: block;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.navbar-links li.active a,
+.navbar-links li a:hover {
+  background: #28304a;
+}
+
+.navbar-profile-section {
+  margin-top: 175px; /* About 4 inches from the top (moved 1 inch down from previous 3 inches) */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.navbar-profile {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+  border: 2px solid #fff;
+}
+
+.navbar-auth-btn {
+  background: #28304a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 24px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.navbar-auth-btn:hover {
+  background: #3a4266;
+}
