@@ -1,19 +1,20 @@
+const { randomUUID } = require('crypto');
+const { Product } = require('../models');
 const Sale = require('../models/Sale');
-const Product = require('../models/Product');
+const { Op } = require('sequelize');
 
 exports.getAllSales = async (req, res) => {
   try {
-    const sales = await Sale.findAll({ include: [{ model: Product, attributes: ['name'] }] });
-    const salesWithProductName = sales.map(sale => ({
-      id: sale.id,
-      productName: sale.Product ? sale.Product.name : sale.productId,
-      quantity: sale.quantity,
-      total: sale.total,
-      date: sale.date
-    }));
-    res.json(salesWithProductName);
+    const sales = await Sale.findAll({
+      order: [['date', 'DESC']],
+      include: [{
+        model: Product,
+        attributes: ['id', 'name', 'price', 'costPrice']
+      }]
+    });
+    res.json(sales);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to fetch sales.' });
   }
 };
 
@@ -23,49 +24,55 @@ exports.getSaleById = async (req, res) => {
     if (!sale) return res.status(404).json({ error: 'Sale not found' });
     res.json(sale);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message, details: err });
   }
 };
 
 exports.createSale = async (req, res) => {
   try {
-    const { productId, quantity, total } = req.body;
-    const sequelize = require('../models/index');
-    let saleCreated = null;
-    try {
-      await sequelize.transaction(async (t) => {
-        const productForUpdate = await Product.findByPk(productId, { lock: t.LOCK.UPDATE, transaction: t });
-        console.log('[SALE] Fetched product for update:', productForUpdate ? productForUpdate.id : null, 'Current qty:', productForUpdate ? productForUpdate.quantity : null);
-        if (!productForUpdate) {
-          throw new Error('Product not found');
-        }
-        if (!Number.isInteger(quantity) || quantity <= 0) {
-          throw new Error('Invalid sale quantity');
-        }
-        if (productForUpdate.quantity < quantity) {
-          console.log('[SALE] Not enough stock. Requested:', quantity, 'Available:', productForUpdate.quantity);
-          throw new Error(`Not enough stock to complete the sale. Available: ${productForUpdate.quantity}`);
-        }
-        saleCreated = await Sale.create({ productId, quantity, total }, { transaction: t });
-        productForUpdate.quantity -= quantity;
-        await productForUpdate.save({ transaction: t });
-        console.log('[SALE] Sale created. New product qty:', productForUpdate.quantity);
-      });
-    } catch (err) {
-      if (err.name === 'SequelizeDatabaseError' || err.name === 'SequelizeValidationError') {
-        console.log('[SALE] DB constraint error:', err.message);
-        return res.status(400).json({ error: 'Database constraint error: ' + err.message });
+    const { products, productId, quantity, total } = req.body;
+    if (Array.isArray(products) && products.length > 0) {
+      const transactionId = randomUUID();
+      try {
+        await sequelize.transaction(async (t) => {
+          for (const item of products) {
+            const { productId, quantity } = item;
+            const productForUpdate = await Product.findByPk(productId, { lock: t.LOCK.UPDATE, transaction: t });
+            if (!productForUpdate) throw new Error(`Product not found: productId=${productId}`);
+            if (!Number.isInteger(quantity) || quantity <= 0) throw new Error(`Invalid sale quantity for productId=${productId}: quantity=${quantity}`);
+            if (productForUpdate.quantity < quantity) throw new Error(`Not enough stock for ${productForUpdate.name} (productId=${productId}). Available: ${productForUpdate.quantity}, Requested: ${quantity}`);
+          }
+          for (const item of products) {
+            const { productId, quantity } = item;
+            const productForUpdate = await Product.findByPk(productId, { lock: t.LOCK.UPDATE, transaction: t });
+            await Sale.create({ productId, quantity, total: (productForUpdate.price || 0) * quantity, transactionId }, { transaction: t });
+            productForUpdate.quantity -= quantity;
+            await productForUpdate.save({ transaction: t });
+          }
+        });
+        return res.json({ message: 'Multi-product sale logged successfully!' });
+      } catch (err) {
+        return res.status(400).json({ error: err.message, details: err });
       }
-      console.log('[SALE] Transaction error:', err.message);
-      return res.status(400).json({ error: err.message });
-    }
-    if (saleCreated) {
-      return res.status(201).json(saleCreated);
     } else {
-      return res.status(400).json({ error: 'Sale could not be completed.' });
+      try {
+        const transactionId = randomUUID();
+        await sequelize.transaction(async (t) => {
+          const productForUpdate = await Product.findByPk(productId, { lock: t.LOCK.UPDATE, transaction: t });
+          if (!productForUpdate) throw new Error('Product not found');
+          if (!Number.isInteger(quantity) || quantity <= 0) throw new Error('Invalid sale quantity');
+          if (productForUpdate.quantity < quantity) throw new Error(`Not enough stock to complete the sale. Available: ${productForUpdate.quantity}`);
+          saleCreated = await Sale.create({ productId, quantity, total, transactionId }, { transaction: t });
+          productForUpdate.quantity -= quantity;
+          await productForUpdate.save({ transaction: t });
+        });
+        return res.json({ message: 'Sale logged successfully!' });
+      } catch (err) {
+        return res.status(400).json({ error: err.message, details: err });
+      }
     }
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    return res.status(500).json({ error: err.message, details: err });
   }
 };
 
@@ -115,7 +122,6 @@ exports.getSalesByProduct = async (req, res) => {
       byProduct[name].total += Number(s.total) || 0;
       byProduct[name].count += 1;
     });
-    // Add average price per product
     const result = Object.values(byProduct).map(p => ({
       ...p,
       average: p.quantity > 0 ? (p.total / p.quantity) : 0

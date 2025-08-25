@@ -5,6 +5,7 @@ const Sale = sequelize.define('Sale', {
   productId: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    field: 'product_id',
     references: {
       model: 'Products',
       key: 'id',
@@ -22,7 +23,16 @@ const Sale = sequelize.define('Sale', {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: DataTypes.NOW,
+    field: 'sold_at',
   },
+  transactionId: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    field: 'transactionId',
+  },
+}, {
+  tableName: 'sales',
+  timestamps: false
 });
 
 const Product = require('./Product');

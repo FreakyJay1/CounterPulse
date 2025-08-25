@@ -39,19 +39,11 @@ async function initDb() {
     await client.connect();
     const hasUsers = await tableExists('users');
     if (!hasUsers) {
-      console.log('Initializing database schema from init.sql...');
       await runInitSql();
-      console.log('Database schema initialized.');
-    } else {
-      console.log('Database schema already exists.');
     }
   } catch (err) {
-    console.error('Error initializing database:', err);
     process.exit(1);
-  } finally {
-    await client.end();
   }
 }
 
 module.exports = initDb;
-
