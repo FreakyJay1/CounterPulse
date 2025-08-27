@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import axios from 'axios';
 
-const API_URL = 'http://192.168.0.108:5000/api/products';
+const API_URL = 'http://localhost:5000/api/products';
 
 const useProductStore = create((set) => ({
   products: [],

@@ -1,94 +1,119 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useUser } from '../utils/UserContext';
 import { useFeedback } from '../utils/FeedbackContext';
-import axios from 'axios';
 
-const AuthPage = () => {
+const API_URL = 'http://192.168.0.108:5000/api/users';
+
+const AuthPage = ({ onAuth }) => {
   const [isLogin, setIsLogin] = useState(true);
-  const [form, setForm] = useState({ username: '', password: '', role: 'owner' });
-  const [loading, setLoading] = useState(false);
-  const { setUser } = useUser();
-  const { setFeedback } = useFeedback();
-  const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('owner');
+  const [error, setError] = useState('');
+  const { setMessage } = useFeedback();
 
-  const handleChange = e => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setError('');
     try {
-      if (isLogin) {
-        const res = await axios.post('/api/users/login', form);
-        setUser(res.data.user);
-        setFeedback({ type: 'success', message: 'Login successful!' });
-        navigate('/');
-      } else {
-        const res = await axios.post('/api/users/register', form);
-        setUser(res.data.user);
-        setFeedback({ type: 'success', message: 'Sign up successful!' });
-        navigate('/');
+      const endpoint = isLogin ? '/login' : '/register';
+      const res = await fetch(API_URL + endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, role })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Auth failed');
+      if (!isLogin) {
+        setMessage('Sign up successful! Welcome.');
       }
+      onAuth(data.token, data.role || role);
     } catch (err) {
-      setFeedback({ type: 'error', message: err.response?.data?.error || 'Authentication failed.' });
-    } finally {
-      setLoading(false);
+      setError(err.message);
     }
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f7f7fa' }}>
-      <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 2px 16px rgba(0,0,0,0.08)', padding: 36, width: 340 }}>
-        <div style={{ fontWeight: 700, fontSize: 24, marginBottom: 18, color: '#232837', textAlign: 'center' }}>{isLogin ? 'Login' : 'Sign Up'}</div>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={form.username}
-            onChange={handleChange}
-            style={{ width: '100%', padding: 12, marginBottom: 14, borderRadius: 8, border: '1px solid #e0e0e0', fontSize: 16 }}
-            required
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={handleChange}
-            style={{ width: '100%', padding: 12, marginBottom: 14, borderRadius: 8, border: '1px solid #e0e0e0', fontSize: 16 }}
-            required
-          />
-          {!isLogin && (
-            <select
-              name="role"
-              value={form.role}
-              onChange={handleChange}
-              style={{ width: '100%', padding: 12, marginBottom: 14, borderRadius: 8, border: '1px solid #e0e0e0', fontSize: 16 }}
-              required
-            >
-              <option value="owner">Owner</option>
-              <option value="assistant">Assistant</option>
-            </select>
-          )}
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f6f8fa' }}>
+      <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 4px 24px rgba(0,0,0,0.08)', padding: 36, width: 370, maxWidth: '90vw' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 32 }}>
           <button
-            type="submit"
-            disabled={loading}
-            style={{ width: '100%', padding: 12, borderRadius: 8, background: '#232837', color: '#fff', fontWeight: 700, fontSize: 16, border: 'none', marginBottom: 10 }}
+            onClick={() => setIsLogin(true)}
+            style={{
+              flex: 1,
+              padding: '12px 0',
+              background: isLogin ? '#1a2236' : '#f6f8fa',
+              color: isLogin ? '#fff' : '#1a2236',
+              border: 'none',
+              borderRadius: '8px 0 0 8px',
+              fontWeight: 600,
+              fontSize: 18,
+              cursor: 'pointer',
+              transition: 'background 0.2s'
+            }}
           >
-            {loading ? (isLogin ? 'Logging in...' : 'Signing up...') : (isLogin ? 'Login' : 'Sign Up')}
+            Login
           </button>
-        </form>
-        <div style={{ textAlign: 'center', marginTop: 10 }}>
           <button
-            onClick={() => setIsLogin(!isLogin)}
-            style={{ background: 'none', border: 'none', color: '#2d7ff9', fontWeight: 600, cursor: 'pointer', fontSize: 15 }}
+            onClick={() => setIsLogin(false)}
+            style={{
+              flex: 1,
+              padding: '12px 0',
+              background: !isLogin ? '#1a2236' : '#f6f8fa',
+              color: !isLogin ? '#fff' : '#1a2236',
+              border: 'none',
+              borderRadius: '0 8px 8px 0',
+              fontWeight: 600,
+              fontSize: 18,
+              cursor: 'pointer',
+              transition: 'background 0.2s'
+            }}
           >
-            {isLogin ? "Don't have an account? Sign Up" : 'Already have an account? Login'}
+            Sign Up
           </button>
         </div>
+        <h2 style={{ textAlign: 'center', color: '#1a2236', marginBottom: 24 }}>{isLogin ? 'Login to your account' : 'Create an account'}</h2>
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: 18 }}>
+            <label style={{ display: 'block', marginBottom: 6, color: '#28304a', fontWeight: 500 }}>Username</label>
+            <input
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              required
+              style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 16 }}
+              autoFocus
+            />
+          </div>
+          <div style={{ marginBottom: 18 }}>
+            <label style={{ display: 'block', marginBottom: 6, color: '#28304a', fontWeight: 500 }}>Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 16 }}
+            />
+          </div>
+          {!isLogin && (
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ display: 'block', marginBottom: 6, color: '#28304a', fontWeight: 500 }}>Role</label>
+              <select
+                value={role}
+                onChange={e => setRole(e.target.value)}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 16 }}
+              >
+                <option value="owner">Owner</option>
+                <option value="staff">Staff</option>
+              </select>
+            </div>
+          )}
+          {error && <div style={{ color: '#e74c3c', marginBottom: 16, textAlign: 'center', fontWeight: 500 }}>{error}</div>}
+          <button
+            type="submit"
+            style={{ width: '100%', padding: '12px 0', background: '#1a2236', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, fontSize: 18, cursor: 'pointer', marginTop: 8 }}
+          >
+            {isLogin ? 'Login' : 'Sign Up'}
+          </button>
+        </form>
       </div>
     </div>
   );

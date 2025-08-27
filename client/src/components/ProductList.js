@@ -37,7 +37,6 @@ const ProductList = ({ setMessage }) => {
 
   return (
     <>
-      {/* Low stock alert for assistant will be handled below */}
       <div style={{ marginBottom: 8 }}>
         <input
           type="text"
@@ -50,7 +49,6 @@ const ProductList = ({ setMessage }) => {
           <button onClick={() => { setSearch(''); setBarcode(''); }}>Clear</button>
         )}
       </div>
-      {/* Show low stock alert for both owner and assistant as a floating alert */}
       {(role === 'owner' || role === 'assistant') && products.filter(p => p.quantity < 3 && p.quantity > 0).length > 0 && (
         <div style={{
           position: 'fixed',

@@ -13,5 +13,4 @@ root.render(
   </React.StrictMode>
 );
 
-// Register the service worker for offline support
 register();
