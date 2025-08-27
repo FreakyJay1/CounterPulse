@@ -2,14 +2,16 @@ import React, { useEffect, useState, useCallback } from 'react';
 import SalesEntry from '../components/SalesEntry';
 import SalesList, { SalesGraph } from '../components/SalesList';
 import useProductStore from '../store/productStore';
+import ShopReportForm from '../components/ShopReportForm';
 
 const SalesPage = () => {
   const { products, fetchProducts } = useProductStore();
   const [sales, setSales] = useState([]);
   const [showEntry, setShowEntry] = useState(false);
   const [productsLoading, setProductsLoading] = useState(true);
+  const [showReportForm, setShowReportForm] = useState(false);
+  const [reportInitialValues, setReportInitialValues] = useState(null);
 
-  // Fetch products, then sales
   const refreshData = useCallback(async () => {
     setProductsLoading(true);
     await fetchProducts();
@@ -28,7 +30,6 @@ const SalesPage = () => {
     refreshData();
   }, [refreshData]);
 
-  // Calculate Expense (cost price), Income (product price), and Profit
   let expense = 0, income = 0;
   if (!productsLoading && products.length > 0) {
     sales.forEach(sale => {
@@ -45,8 +46,40 @@ const SalesPage = () => {
   }
   const profit = income - expense;
 
-  const handleDownloadReport = () => {
-    window.open('http://192.168.0.108:5000/api/report/shop', '_blank');
+  const prepareShopReportInitialValues = () => {
+    const shopName = 'Main Shop'; // Change as needed
+    let preparedBy = localStorage.getItem('userName') || 'Shop User';
+    let cashSales = 0, cardSales = 0, airtimeSales = 0, numTransactions = 0, cashCountEnd = 0;
+
+    sales.forEach(sale => {
+      if (sale.paymentType === 'cash') cashSales += sale.total;
+      else if (sale.paymentType === 'card') cardSales += sale.total;
+      else if (sale.paymentType === 'airtime') airtimeSales += sale.total;
+      numTransactions++;
+      if (sale.paymentType === 'cash' && sale.cashCountEnd) cashCountEnd = sale.cashCountEnd;
+    });
+
+    const fastMovingItems = products.filter(p => p.quantity > 0 && p.quantity < 5).map(p => ({ name: p.name, qty: p.quantity }));
+    const restockItems = products.filter(p => p.quantity === 0).map(p => p.name);
+    const slowExpiredItems = products.filter(p => p.quantity > 10).map(p => p.name); // Example: slow if >10 in stock
+    return {
+      shopName,
+      preparedBy,
+      cashSales: cashSales.toFixed(2),
+      cardSales: cardSales.toFixed(2),
+      airtimeSales: airtimeSales.toFixed(2),
+      numTransactions: numTransactions.toString(),
+      cashCountEnd: cashCountEnd ? cashCountEnd.toString() : '',
+      fastMovingItems: fastMovingItems.length ? fastMovingItems : [{ name: '', qty: '' }],
+      restockItems: restockItems.length ? restockItems : [''],
+      slowExpiredItems: slowExpiredItems.length ? slowExpiredItems : [''],
+    };
+  };
+
+  const handleOpenReportForm = () => {
+    const initialValues = prepareShopReportInitialValues();
+    setReportInitialValues(initialValues);
+    setShowReportForm(true);
   };
 
   if (productsLoading || products.length === 0) {
@@ -71,7 +104,7 @@ const SalesPage = () => {
         </div>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 16 }}>
           <button onClick={() => setShowEntry(true)} style={{ width: '100%', padding: '12px 0', background: '#1a2236', color: '#fff', border: 'none', borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>Log Sale</button>
-          <button onClick={handleDownloadReport} style={{ width: '100%', padding: '12px 0', background: '#28304a', color: '#fff', border: 'none', borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>Download Shop Report</button>
+          <button onClick={handleOpenReportForm} style={{ width: '100%', padding: '12px 0', background: '#28304a', color: '#fff', border: 'none', borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>Download Shop Report</button>
         </div>
       </div>
       <SalesGraph sales={sales} products={products} />
@@ -84,6 +117,7 @@ const SalesPage = () => {
           </div>
         </div>
       )}
+      {showReportForm && <ShopReportForm onClose={() => setShowReportForm(false)} initialValues={reportInitialValues} autoDownload={false} />}
       <div style={{ background: '#fff', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.04)', padding: 24 }}>
         <SalesList sales={sales} products={products} />
       </div>
