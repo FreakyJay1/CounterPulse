@@ -12,4 +12,19 @@ const sequelize = new Sequelize(
   }
 );
 
-module.exports = sequelize;
+const Product = require('./Product');
+const Sale = require('./Sale');
+const SaleItem = require('./SaleItem');
+
+Sale.hasMany(SaleItem, { foreignKey: 'saleId', onDelete: 'CASCADE' });
+SaleItem.belongsTo(Sale, { foreignKey: 'saleId' });
+
+SaleItem.belongsTo(Product, { foreignKey: 'productId' });
+Product.hasMany(SaleItem, { foreignKey: 'productId', onDelete: 'CASCADE' });
+
+module.exports = {
+  sequelize,
+  Product,
+  Sale,
+  SaleItem,
+};

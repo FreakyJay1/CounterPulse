@@ -5,7 +5,7 @@ const saleRoutes = require('./routes/saleRoutes');
 const userRoutes = require('./routes/userRoutes');
 const syncRoutes = require('./routes/syncRoutes');
 const reportRoutes = require('./routes/reportRoutes');
-const sequelize = require('./models');
+const sequelize = require('./models/sequelize');
 const initDb = require('./utils/initDb');
 
 const app = express();

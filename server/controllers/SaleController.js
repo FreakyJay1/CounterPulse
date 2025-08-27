@@ -1,78 +1,86 @@
-const { randomUUID } = require('crypto');
-const { Product } = require('../models');
 const Sale = require('../models/Sale');
-const { Op } = require('sequelize');
+const SaleItem = require('../models/SaleItem');
+const Product = require('../models/Product');
+const { sequelize } = require('../models');
 
 exports.getAllSales = async (req, res) => {
   try {
     const sales = await Sale.findAll({
-      order: [['date', 'DESC']],
       include: [{
-        model: Product,
-        attributes: ['id', 'name', 'price', 'costPrice']
-      }]
+        model: SaleItem,
+        include: [{ model: Product, attributes: ['id', 'name', 'price', 'costPrice'] }]
+      }],
+      order: [['date', 'DESC']]
     });
     res.json(sales);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch sales.' });
+    res.status(500).json({ error: err.message });
   }
 };
 
 exports.getSaleById = async (req, res) => {
   try {
-    const sale = await Sale.findByPk(req.params.id);
+    const sale = await Sale.findByPk(req.params.id, {
+      include: [{
+        model: SaleItem,
+        include: [{ model: Product, attributes: ['id', 'name', 'price', 'costPrice'] }]
+      }]
+    });
     if (!sale) return res.status(404).json({ error: 'Sale not found' });
     res.json(sale);
   } catch (err) {
-    res.status(500).json({ error: err.message, details: err });
+    res.status(500).json({ error: err.message });
   }
 };
 
 exports.createSale = async (req, res) => {
+  console.log('Incoming sale request:', JSON.stringify(req.body));
+  const { items } = req.body;
+  if (!Array.isArray(items) || items.length === 0) {
+    console.log('Error: No sale items provided.');
+    return res.status(400).json({ error: 'No sale items provided.' });
+  }
   try {
-    const { products, productId, quantity, total } = req.body;
-    if (Array.isArray(products) && products.length > 0) {
-      const transactionId = randomUUID();
-      try {
-        await sequelize.transaction(async (t) => {
-          for (const item of products) {
-            const { productId, quantity } = item;
-            const productForUpdate = await Product.findByPk(productId, { lock: t.LOCK.UPDATE, transaction: t });
-            if (!productForUpdate) throw new Error(`Product not found: productId=${productId}`);
-            if (!Number.isInteger(quantity) || quantity <= 0) throw new Error(`Invalid sale quantity for productId=${productId}: quantity=${quantity}`);
-            if (productForUpdate.quantity < quantity) throw new Error(`Not enough stock for ${productForUpdate.name} (productId=${productId}). Available: ${productForUpdate.quantity}, Requested: ${quantity}`);
-          }
-          for (const item of products) {
-            const { productId, quantity } = item;
-            const productForUpdate = await Product.findByPk(productId, { lock: t.LOCK.UPDATE, transaction: t });
-            await Sale.create({ productId, quantity, total: (productForUpdate.price || 0) * quantity, transactionId }, { transaction: t });
-            productForUpdate.quantity -= quantity;
-            await productForUpdate.save({ transaction: t });
-          }
-        });
-        return res.json({ message: 'Multi-product sale logged successfully!' });
-      } catch (err) {
-        return res.status(400).json({ error: err.message, details: err });
+    let saleCreated = null;
+    await sequelize.transaction(async (t) => {
+      let saleTotal = 0;
+      for (const item of items) {
+        const product = await Product.findByPk(item.productId, { lock: t.LOCK.UPDATE, transaction: t });
+        if (!product) {
+          console.log('Error: Product not found:', item.productId);
+          throw new Error('Product not found: ' + item.productId);
+        }
+        if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
+          console.log('Error: Invalid quantity for product:', product.name, item.quantity);
+          throw new Error('Invalid quantity for product: ' + product.name);
+        }
+        if (product.quantity < item.quantity) {
+          console.log('Error: Not enough stock for', product.name, 'Available:', product.quantity, 'Requested:', item.quantity);
+          throw new Error(`Not enough stock for ${product.name}. Available: ${product.quantity}`);
+        }
+        saleTotal += item.total;
       }
+      saleCreated = await Sale.create({ total: saleTotal }, { transaction: t });
+      for (const item of items) {
+        await SaleItem.create({
+          saleId: saleCreated.id,
+          productId: item.productId,
+          quantity: item.quantity,
+          total: item.total
+        }, { transaction: t });
+        const product = await Product.findByPk(item.productId, { transaction: t });
+        product.quantity -= item.quantity;
+        await product.save({ transaction: t });
+      }
+    });
+    if (saleCreated) {
+      return res.status(201).json(saleCreated);
     } else {
-      try {
-        const transactionId = randomUUID();
-        await sequelize.transaction(async (t) => {
-          const productForUpdate = await Product.findByPk(productId, { lock: t.LOCK.UPDATE, transaction: t });
-          if (!productForUpdate) throw new Error('Product not found');
-          if (!Number.isInteger(quantity) || quantity <= 0) throw new Error('Invalid sale quantity');
-          if (productForUpdate.quantity < quantity) throw new Error(`Not enough stock to complete the sale. Available: ${productForUpdate.quantity}`);
-          saleCreated = await Sale.create({ productId, quantity, total, transactionId }, { transaction: t });
-          productForUpdate.quantity -= quantity;
-          await productForUpdate.save({ transaction: t });
-        });
-        return res.json({ message: 'Sale logged successfully!' });
-      } catch (err) {
-        return res.status(400).json({ error: err.message, details: err });
-      }
+      return res.status(400).json({ error: 'Sale could not be completed.' });
     }
   } catch (err) {
-    return res.status(500).json({ error: err.message, details: err });
+    console.log('Sale creation error:', err.message);
+    return res.status(400).json({ error: err.message });
   }
 };
 
