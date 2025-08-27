@@ -19,14 +19,20 @@ CREATE TABLE IF NOT EXISTS products (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Sales table
+-- Sales table (now represents a transaction, not a single product)
 CREATE TABLE IF NOT EXISTS sales (
     id SERIAL PRIMARY KEY,
-    product_id INTEGER REFERENCES products(id),
-    quantity INTEGER NOT NULL,
     total NUMERIC(10,2) NOT NULL,
     sold_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Optionally, add seed data below
+-- SaleItems table (each row is a product in a sale)
+CREATE TABLE IF NOT EXISTS sale_items (
+    id SERIAL PRIMARY KEY,
+    sale_id INTEGER REFERENCES sales(id) ON DELETE CASCADE,
+    product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+    quantity INTEGER NOT NULL,
+    total NUMERIC(10,2) NOT NULL
+);
+
 -- INSERT INTO users (username, password, role) VALUES ('admin', 'adminpassword', 'admin');
