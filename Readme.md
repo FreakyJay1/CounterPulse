@@ -13,14 +13,22 @@ Spaza shop owners and informal traders are the backbone of our communities, but 
 
 ### **The Solution: CounterPulse**
 
-**CounterPulse** is a lightweight, offline-first Progressive Web App (PWA) designed specifically for the needs of informal traders. It replaces guesswork with data, empowering any small business owner to manage their inventory, track sales, and see their real-time profit—all from a basic smartphone, with or without an internet connection.
+**CounterPulse** is a lightweight, offline-first Progressive Web App (PWA) designed specifically for the needs of informal traders. It replaces guesswork with data, empowering any small business owner to manage their inventory, track sales, and see their real-time profit—all from a desktop or laptop, with or without an internet connection.
 
 ### **Key Features (MVP)**
 
 -   📲 **Offline-First Reliability:** The app works flawlessly without an internet connection. All sales and stock updates are saved locally and synced securely to the cloud when the user is back online.
+-   🖥️ **Desktop-First Experience:** Designed for desktop and laptop use—optimized layouts, mouse/keyboard navigation, and external barcode scanner support make it easy to use on any computer.
+-   🔍 **Barcode Scanning:** Use an external barcode scanner or manual entry for product barcodes in sales and inventory.
 -   📈 **Simple Profit Dashboard:** At a glance, users can see their daily/weekly profit, total revenue, and best-selling items, turning raw sales data into business intelligence.
 -   🔔 **Smart Low-Stock Alerts:** CounterPulse automatically highlights products that are running low, helping owners reorder in time and never miss a sale.
--   📦 **Barcode Scanning:** Uses the phone's camera to quickly add new items or log sales, dramatically speeding up the checkout and stock-taking process.
+
+### **Desktop Experience**
+
+- Optimized for desktop and laptop screens with responsive layouts.
+- Supports external barcode scanners for quick product lookup and sales.
+- Installable as a PWA for a native-like experience on desktops.
+- Works offline and syncs data when back online.
 
 ### **Technology Stack**
 
@@ -39,8 +47,8 @@ To run this project locally, follow these steps:
 
 1.  **Clone the repository:**
     ```sh
-    git clone https://github.com/[YourUsername]/Stok-Smart.git
-    cd Stok-Smart
+    git clone https://github.com/FreakyJay1/CounterPulse.git
+    cd CounterPulse
     ```
 
 2.  **Setup Backend:**
@@ -48,20 +56,16 @@ To run this project locally, follow these steps:
     cd server
     npm install
     # Create a .env file based on .env.example and add your database credentials
-    npm run dev
+    npm start
     ```
 
 3.  **Setup Frontend:**
     ```sh
-    cd client
+    cd ../client
     npm install
     npm start
     ```
 
-The application will be running on `http://localhost:3000`.
+---
 
-### **Development Journey**
-
-The inspiration for CounterPulse came from observing the daily hustle of local spaza shops. The initial idea was a simple stock counter, but the project's true purpose was unlocked with one key addition: tracking both **cost price** and **selling price**. This decision transformed the app from a simple utility into a powerful profit-tracking tool.
-
-The biggest technical challenge was perfecting the **offline-first sync logic**. I implemented a system using service workers to intercept network requests while offline, storing them in a queue. When the app detects an internet connection, it processes this queue, syncing the data with the backend API. This ensures zero data loss and a seamless user experience, even in areas with unreliable connectivity. The result is a focused MVP that delivers immediate financial clarity to a vital, underserved sector of the economy.
+For more, see the [documentation](./documentation/user%20stories.md).
