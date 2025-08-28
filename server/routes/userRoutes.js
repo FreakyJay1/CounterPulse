@@ -14,8 +14,11 @@ router.post('/simple-login', (req, res) => {
   const token = jwt.sign({ username, role }, JWT_SECRET, { expiresIn: '1d' });
   res.json({ token, role });
 });
-router.get('/', auth(['admin']), UserController.getAllUsers);
-router.get('/:id', auth(['admin', 'self']), UserController.getUserById);
-router.delete('/:id', auth(['admin']), UserController.deleteUser);
+router.get('/', auth(['owner']), UserController.getAllUsers);
+router.get('/:id', auth(['owner', 'self']), UserController.getUserById);
+router.delete('/:id', auth(['owner']), UserController.deleteUser);
+router.post('/create-by-owner', auth(['owner']), UserController.createByOwner);
+router.post('/reset-password', UserController.resetPassword);
+router.put('/:id', auth(['owner']), UserController.updateUser);
 
 module.exports = router;

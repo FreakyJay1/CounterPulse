@@ -32,6 +32,26 @@ const User = sequelize.define('User', {
     },
     defaultValue: 'user',
   },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      isEmail: { msg: 'Must be a valid email address' },
+      notNull: { msg: 'Email is required' },
+      notEmpty: { msg: 'Email cannot be empty' },
+    },
+  },
+  resetToken: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  resetTokenExpiry: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+}, {
+  tableName: 'users',
 });
 
 module.exports = User;
