@@ -82,8 +82,31 @@ const SalesPage = () => {
     setShowReportForm(true);
   };
 
+  const role = localStorage.getItem('role');
+
   if (productsLoading || products.length === 0) {
     return <div style={{ textAlign: 'center', marginTop: 80, color: '#888', fontSize: 20 }}>Loading sales dashboard...</div>;
+  }
+
+  if (role === 'assistant') {
+    return (
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 0' }}>
+        <h2 style={{ color: '#1a2236', marginBottom: 32, fontWeight: 800, letterSpacing: 1 }}>Sales Overview</h2>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 16, marginBottom: 32 }}>
+          <button onClick={() => setShowEntry(true)} style={{ width: '100%', padding: '12px 0', background: '#1a2236', color: '#fff', border: 'none', borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>Log Sale</button>
+        </div>
+        {showEntry && (
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(30,34,54,0.35)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ minWidth: 350, maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto' }}>
+              <SalesEntry products={products} onSaleLogged={() => { setShowEntry(false); refreshData(); }} onCancel={() => setShowEntry(false)} />
+            </div>
+          </div>
+        )}
+        <div style={{ background: '#fff', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.04)', padding: 24 }}>
+          <SalesList sales={sales} products={products} limit={5} />
+        </div>
+      </div>
+    );
   }
 
   return (

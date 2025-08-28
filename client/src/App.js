@@ -9,6 +9,8 @@ import NavBar from './components/NavBar';
 
 const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
 const SalesPage = React.lazy(() => import('./pages/SalesPage'));
+const UserManagementPage = React.lazy(() => import('./pages/UserManagementPage'));
+const ResetPasswordPage = React.lazy(() => import('./pages/ResetPasswordPage'));
 
 function AppContent() {
   const { fetchProducts } = useProductStore();
@@ -34,6 +36,8 @@ function AppContent() {
               <Route path="/" element={<DashboardPage />} />
               <Route path="/inventory" element={<InventoryPage />} />
               <Route path="/sales" element={<SalesPage />} />
+              <Route path="/users" element={<UserManagementPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </React.Suspense>

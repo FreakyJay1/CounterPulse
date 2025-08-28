@@ -123,7 +123,9 @@ const InventoryPage = () => {
               <th style={{ padding: 18, textAlign: 'left', fontWeight: 800, fontSize: 16 }}>Barcode</th>
               <th style={{ padding: 18, textAlign: 'right', fontWeight: 800, fontSize: 16 }}>Quantity</th>
               <th style={{ padding: 18, textAlign: 'right', fontWeight: 800, fontSize: 16 }}>Price</th>
-              <th style={{ padding: 18, textAlign: 'right', fontWeight: 800, fontSize: 16 }}>Cost Price</th>
+              {role !== 'assistant' && (
+                <th style={{ padding: 18, textAlign: 'right', fontWeight: 800, fontSize: 16 }}>Cost Price</th>
+              )}
               <th style={{ padding: 18, textAlign: 'center', fontWeight: 800, fontSize: 16 }}>Status</th>
               {role !== 'assistant' && (
                 <th style={{ padding: 18, textAlign: 'center', fontWeight: 800, fontSize: 16 }}>Actions</th>
@@ -147,7 +149,9 @@ const InventoryPage = () => {
                   <td style={{ padding: 18 }}>{product.barcode}</td>
                   <td style={{ padding: 18, textAlign: 'right' }}>{product.quantity}</td>
                   <td style={{ padding: 18, textAlign: 'right', color: '#27ae60', fontWeight: 700 }}>R{product.price?.toFixed(2)}</td>
-                  <td style={{ padding: 18, textAlign: 'right', color: '#e67e22', fontWeight: 700 }}>R{product.costPrice?.toFixed(2)}</td>
+                  {role !== 'assistant' && (
+                    <td style={{ padding: 18, textAlign: 'right', color: '#e67e22', fontWeight: 700 }}>R{product.costPrice?.toFixed(2)}</td>
+                  )}
                   <td style={{ padding: 18, textAlign: 'center' }}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 18px', borderRadius: 16, fontWeight: 800, fontSize: 15, color: status.color, background: status.bg, boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
                       {status.label === 'In Stock' && <span role="img" aria-label="check">✅</span>}
@@ -209,7 +213,9 @@ const InventoryPage = () => {
               <div><span style={{ fontWeight: 600, color: '#28304a' }}>Category:</span> {searchResult.category}</div>
               <div><span style={{ fontWeight: 600, color: '#28304a' }}>Quantity:</span> {searchResult.quantity}</div>
               <div><span style={{ fontWeight: 600, color: '#28304a' }}>Price:</span> <span style={{ color: '#27ae60', fontWeight: 700 }}>R{searchResult.price?.toFixed(2)}</span></div>
-              <div><span style={{ fontWeight: 600, color: '#28304a' }}>Cost Price:</span> <span style={{ color: '#e67e22', fontWeight: 700 }}>R{searchResult.costPrice?.toFixed(2)}</span></div>
+              {role !== 'assistant' && (
+                <div><span style={{ fontWeight: 600, color: '#28304a' }}>Cost Price:</span> <span style={{ color: '#e67e22', fontWeight: 700 }}>R{searchResult.costPrice?.toFixed(2)}</span></div>
+              )}
               <div><span style={{ fontWeight: 600, color: '#28304a' }}>Status:</span> <span style={{ display: 'inline-block', marginLeft: 8, padding: '4px 14px', borderRadius: 12, fontWeight: 600, fontSize: 14, color: getStatus(searchResult.quantity).color, background: getStatus(searchResult.quantity).bg }}>{getStatus(searchResult.quantity).label}</span></div>
             </div>
             <button onClick={closeDetails} style={{ marginTop: 10, background: '#28304a', color: '#fff', border: 'none', borderRadius: 6, padding: '10px 28px', fontWeight: 600, fontSize: 15, cursor: 'pointer' }}>Close</button>

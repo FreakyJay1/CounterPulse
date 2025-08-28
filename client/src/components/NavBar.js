@@ -35,6 +35,13 @@ const NavBar = () => {
           <Link to="/sales">Sales</Link>
         </li>
       </ul>
+      {role === 'owner' && (
+        <ul className="navbar-links">
+          <li className={location.pathname === '/users' ? 'active' : ''}>
+            <Link to="/users">User Management</Link>
+          </li>
+        </ul>
+      )}
       <div className="navbar-profile-section">
         <img
           src={logo}

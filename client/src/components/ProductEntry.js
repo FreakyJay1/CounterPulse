@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import useProductStore from '../store/productStore';
-import BarcodeScanner from './BarcodeScanner';
+import { useUser } from '../utils/UserContext';
 
 const ProductEntry = ({ product, onSaved, onCancel }) => {
   const [name, setName] = useState('');
@@ -13,6 +13,7 @@ const ProductEntry = ({ product, onSaved, onCancel }) => {
   const [success, setSuccess] = useState('');
   const addProduct = useProductStore((state) => state.addProduct);
   const updateProduct = useProductStore((state) => state.updateProduct);
+  const { role } = useUser();
 
   useEffect(() => {
     if (product) {
@@ -81,10 +82,11 @@ const ProductEntry = ({ product, onSaved, onCancel }) => {
       <input type="text" placeholder="Product Name" value={name} onChange={e => setName(e.target.value)} style={inputStyle} />
       <input type="text" placeholder="Category" value={category} onChange={e => setCategory(e.target.value)} style={inputStyle} />
       <input type="number" placeholder="Price" value={price} onChange={e => setPrice(e.target.value)} style={inputStyle} min="0" step="0.01" />
-      <input type="number" placeholder="Cost Price" value={costPrice} onChange={e => setCostPrice(e.target.value)} style={inputStyle} min="0" step="0.01" />
+      {role === 'owner' && (
+        <input type="number" placeholder="Cost Price" value={costPrice} onChange={e => setCostPrice(e.target.value)} style={inputStyle} min="0" step="0.01" />
+      )}
       <input type="text" placeholder="Barcode" value={barcode} onChange={e => setBarcode(e.target.value)} style={inputStyle} />
       <input type="number" placeholder="Quantity" value={quantity} onChange={e => setQuantity(e.target.value)} style={inputStyle} min="0" />
-      {/* Optionally, add BarcodeScanner here if needed */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 }}>
         <button type="button" onClick={onCancel} style={cancelBtnStyle}>Cancel</button>
         <button type="submit" style={saveBtnStyle}>{product ? 'Update' : 'Save'}</button>

@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 
-const SalesList = ({ sales, products }) => {
-  const latestSales = [...sales]
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 5);
+const SalesList = ({ sales, products, limit }) => {
+  const sortedSales = [...sales].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const latestSales = typeof limit === 'number' ? sortedSales.slice(0, limit) : sortedSales;
 
   return (
     <div>

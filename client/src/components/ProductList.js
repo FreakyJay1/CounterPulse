@@ -72,6 +72,11 @@ const ProductList = ({ setMessage }) => {
         {products.map((product) => (
           <li key={product.id}>
             {product.name} ({product.category}) - R{product.price.toFixed(2)} | Qty: {product.quantity}
+            {role === 'owner' && product.costPrice !== undefined && (
+              <span style={{ color: '#888', marginLeft: 8 }}>
+                Cost: R{product.costPrice.toFixed(2)}
+              </span>
+            )}
             {barcode && <span style={{ color: 'green', marginLeft: 8 }}>Price: R{product.price.toFixed(2)}</span>}
             {role === 'owner' && (
               <>
