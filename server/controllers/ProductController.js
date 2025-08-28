@@ -49,7 +49,15 @@ exports.deleteProduct = async (req, res) => {
     await product.destroy();
     res.json({ message: 'Product deleted' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Error deleting product:', err);
+    console.error('Error details:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
+    if (
+      err.name === 'SequelizeForeignKeyConstraintError' ||
+      (err.name === 'SequelizeDatabaseError' && err.parent && err.parent.code === '23503')
+    ) {
+      return res.status(409).json({ error: 'Cannot delete product: it is referenced in other records (e.g., sales).' });
+    }
+    res.status(500).json({ error: err.message || 'Internal server error', details: err, parent: err.parent });
   }
 };
 

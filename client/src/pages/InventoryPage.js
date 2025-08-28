@@ -28,10 +28,20 @@ const InventoryPage = () => {
 
   const handleRemove = async (productId) => {
     if (window.confirm('Are you sure you want to remove this product?')) {
-      await axios.delete(`http://192.168.0.108:5000/api/products/${productId}`, {
-        headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
-      });
-      fetchProducts();
+      try {
+        await axios.delete(`http://192.168.0.108:5000/api/products/${productId}`, {
+          headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
+        });
+        fetchProducts();
+      } catch (err) {
+        let msg = 'Failed to delete product.';
+        if (err.response && err.response.data) {
+          if (err.response.data.error) msg += '\n' + err.response.data.error;
+          if (err.response.data.details) msg += '\nDetails: ' + JSON.stringify(err.response.data.details);
+          if (err.response.data.parent) msg += '\nParent: ' + JSON.stringify(err.response.data.parent);
+        }
+        alert(msg);
+      }
     }
   };
 

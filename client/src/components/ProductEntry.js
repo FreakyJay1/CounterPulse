@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import useProductStore from '../store/productStore';
 import { useUser } from '../utils/UserContext';
+import BarcodeScanner from './BarcodeScanner';
 
 const ProductEntry = ({ product, onSaved, onCancel }) => {
   const [name, setName] = useState('');
@@ -11,6 +12,7 @@ const ProductEntry = ({ product, onSaved, onCancel }) => {
   const [costPrice, setCostPrice] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showScanner, setShowScanner] = useState(false);
   const addProduct = useProductStore((state) => state.addProduct);
   const updateProduct = useProductStore((state) => state.updateProduct);
   const { role } = useUser();
@@ -75,23 +77,69 @@ const ProductEntry = ({ product, onSaved, onCancel }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ minWidth: 340, maxWidth: 400, display: 'flex', flexDirection: 'column', gap: 18 }}>
-      <h3 style={{ margin: 0, color: '#1a2236', fontWeight: 700, fontSize: 22, textAlign: 'center' }}>{product ? 'Edit Product' : 'Add Product'}</h3>
-      {error && <div style={{ color: '#e74c3c', marginBottom: 8, textAlign: 'center' }}>{error}</div>}
-      {success && <div style={{ color: '#27ae60', marginBottom: 8, textAlign: 'center' }}>{success}</div>}
-      <input type="text" placeholder="Product Name" value={name} onChange={e => setName(e.target.value)} style={inputStyle} />
-      <input type="text" placeholder="Category" value={category} onChange={e => setCategory(e.target.value)} style={inputStyle} />
-      <input type="number" placeholder="Price" value={price} onChange={e => setPrice(e.target.value)} style={inputStyle} min="0" step="0.01" />
-      {role === 'owner' && (
-        <input type="number" placeholder="Cost Price" value={costPrice} onChange={e => setCostPrice(e.target.value)} style={inputStyle} min="0" step="0.01" />
-      )}
-      <input type="text" placeholder="Barcode" value={barcode} onChange={e => setBarcode(e.target.value)} style={inputStyle} />
-      <input type="number" placeholder="Quantity" value={quantity} onChange={e => setQuantity(e.target.value)} style={inputStyle} min="0" />
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 }}>
-        <button type="button" onClick={onCancel} style={cancelBtnStyle}>Cancel</button>
-        <button type="submit" style={saveBtnStyle}>{product ? 'Update' : 'Save'}</button>
-      </div>
-    </form>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 420, width: '100%' }}>
+      <form onSubmit={handleSubmit} style={{
+        background: '#fff',
+        borderRadius: 18,
+        boxShadow: '0 2px 24px rgba(30,34,54,0.10)',
+        minWidth: 340,
+        maxWidth: 420,
+        width: '100%',
+        padding: 36,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 22,
+        position: 'relative',
+      }}>
+        <h3 style={{ margin: 0, color: '#1a2236', fontWeight: 800, fontSize: 26, textAlign: 'center', letterSpacing: 1 }}>{product ? 'Edit Product' : 'Add Product'}</h3>
+        {error && <div style={{ background: '#ffeaea', color: '#e74c3c', borderRadius: 8, padding: '10px 0', textAlign: 'center', fontWeight: 600 }}>{error}</div>}
+        {success && <div style={{ background: '#eafaf1', color: '#27ae60', borderRadius: 8, padding: '10px 0', textAlign: 'center', fontWeight: 600 }}>{success}</div>}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <label style={labelStyle}>Product Name</label>
+          <input type="text" placeholder="Product Name" value={name} onChange={e => setName(e.target.value)} style={inputStyle} />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <label style={labelStyle}>Category</label>
+          <input type="text" placeholder="Category" value={category} onChange={e => setCategory(e.target.value)} style={inputStyle} />
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+          <div style={{ flex: 1, minWidth: 120, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <label style={labelStyle}>Price</label>
+            <input type="number" placeholder="Price" value={price} onChange={e => setPrice(e.target.value)} style={inputStyle} min="0" step="0.01" />
+          </div>
+          {role === 'owner' && (
+            <div style={{ flex: 1, minWidth: 120, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <label style={labelStyle}>Cost Price</label>
+              <input type="number" placeholder="Cost Price" value={costPrice} onChange={e => setCostPrice(e.target.value)} style={inputStyle} min="0" step="0.01" />
+            </div>
+          )}
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+          <div style={{ flex: 1, minWidth: 180, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label style={labelStyle}>Barcode</label>
+            <input type="text" placeholder="Barcode" value={barcode} onChange={e => setBarcode(e.target.value)} style={{ ...inputStyle, marginBottom: 8 }} />
+            <button type="button" onClick={() => setShowScanner(true)} style={{ ...scanBtnStyle, width: '100%', height: 40 }}>Scan</button>
+          </div>
+          <div style={{ flex: 1, minWidth: 120, display: 'flex', flexDirection: 'column', gap: 6, justifyContent: 'flex-end' }}>
+            <label style={labelStyle}>Quantity</label>
+            <input type="number" placeholder="Quantity" value={quantity} onChange={e => setQuantity(e.target.value)} style={inputStyle} min="0" />
+          </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 16, marginTop: 24 }}>
+          <button type="button" onClick={onCancel} style={cancelBtnStyle}>Cancel</button>
+          <button type="submit" style={saveBtnStyle}>{product ? 'Update' : 'Add'}</button>
+        </div>
+        {showScanner && (
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(30,34,54,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300 }}>
+            <div style={{ background: '#fff', borderRadius: 18, boxShadow: '0 2px 24px rgba(0,0,0,0.14)', padding: 36, minWidth: 420, minHeight: 220, maxWidth: '90vw', maxHeight: '90vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <h2 style={{ color: '#1a2236', marginBottom: 18, fontWeight: 700, fontSize: 22, letterSpacing: 1 }}>Scan Product Barcode</h2>
+              <BarcodeScanner onDetected={code => { setBarcode(code); setShowScanner(false); }} />
+              <button onClick={() => setShowScanner(false)} style={{ marginTop: 18, background: '#e74c3c', color: '#fff', border: 'none', borderRadius: 6, padding: '10px 28px', fontWeight: 600, fontSize: 15, cursor: 'pointer' }}>Cancel</button>
+            </div>
+          </div>
+        )}
+      </form>
+    </div>
   );
 };
 
@@ -125,6 +173,27 @@ const cancelBtnStyle = {
   fontWeight: 600,
   fontSize: 15,
   cursor: 'pointer',
+};
+
+const labelStyle = {
+  fontWeight: 600,
+  color: '#28304a',
+  fontSize: 15,
+  marginBottom: 2,
+  letterSpacing: 0.2,
+};
+
+const scanBtnStyle = {
+  background: '#27ae60',
+  color: '#fff',
+  border: 'none',
+  borderRadius: 6,
+  padding: '8px 16px',
+  fontWeight: 600,
+  fontSize: 15,
+  cursor: 'pointer',
+  boxShadow: '0 2px 8px rgba(39,174,96,0.08)',
+  transition: 'background 0.2s, box-shadow 0.2s',
 };
 
 export default ProductEntry;

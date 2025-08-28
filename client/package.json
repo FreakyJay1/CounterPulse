@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "@zxing/library": "^0.21.3",
     "axios": "^1.11.0",
     "react-barcode-reader": "^0.0.2",
     "react-markdown": "^10.1.0",

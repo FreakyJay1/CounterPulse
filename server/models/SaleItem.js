@@ -12,11 +12,12 @@ const SaleItem = sequelize.define('SaleItem', {
   },
   productId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true, // allow null for ON DELETE SET NULL
     references: {
       model: 'Products',
       key: 'id',
     },
+    onDelete: 'SET NULL',
   },
   quantity: {
     type: DataTypes.INTEGER,
