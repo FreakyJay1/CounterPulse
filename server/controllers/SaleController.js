@@ -34,13 +34,18 @@ exports.getSaleById = async (req, res) => {
 };
 
 exports.createSale = async (req, res) => {
-  console.log('Incoming sale request:', JSON.stringify(req.body));
-  const { items } = req.body;
+  const { items, clientId } = req.body;
   if (!Array.isArray(items) || items.length === 0) {
     console.log('Error: No sale items provided.');
     return res.status(400).json({ error: 'No sale items provided.' });
   }
   try {
+    if (clientId) {
+      const existingSale = await Sale.findOne({ where: { clientId } });
+      if (existingSale) {
+        return res.status(200).json(existingSale);
+      }
+    }
     let saleCreated = null;
     await sequelize.transaction(async (t) => {
       let saleTotal = 0;

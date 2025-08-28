@@ -3,6 +3,7 @@ import useProductStore from '../store/productStore';
 import { useUser } from '../utils/UserContext';
 import BarcodeScanner from './BarcodeScanner';
 import ProductEntry from './ProductEntry';
+import { queueAction } from '../utils/offlineQueue';
 
 const ProductList = ({ setMessage }) => {
   const products = useProductStore((state) => state.products);
@@ -25,8 +26,20 @@ const ProductList = ({ setMessage }) => {
   }, [search, barcode, fetchProducts, searchProducts]);
 
   const handleRemove = async (id) => {
-    await removeProduct(id);
-    setMessage && setMessage('Product removed successfully!');
+    if (!navigator.onLine) {
+      queueAction({ type: 'REMOVE_PRODUCT', payload: { id } });
+      await removeProduct(id);
+      setMessage && setMessage('Product removal queued (offline).');
+    } else {
+      try {
+        await removeProduct(id);
+        setMessage && setMessage('Product removed successfully!');
+      } catch (err) {
+        queueAction({ type: 'REMOVE_PRODUCT', payload: { id } });
+        await removeProduct(id);
+        setMessage && setMessage('Product removal queued (offline due to network error).');
+      }
+    }
     setTimeout(() => setMessage && setMessage(''), 1200);
     await fetchProducts();
   };

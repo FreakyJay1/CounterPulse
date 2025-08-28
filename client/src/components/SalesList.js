@@ -3,7 +3,14 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 
 const SalesList = ({ sales, products, limit }) => {
   const sortedSales = [...sales].sort((a, b) => new Date(b.date) - new Date(a.date));
-  const latestSales = typeof limit === 'number' ? sortedSales.slice(0, limit) : sortedSales;
+  const filteredSales = sortedSales.filter(sale =>
+    sale.SaleItems && sale.SaleItems.length > 0 &&
+    sale.SaleItems.every(item => {
+      const product = item.Product || products.find(p => p.id === item.productId);
+      return !!product;
+    })
+  );
+  const latestSales = typeof limit === 'number' ? filteredSales.slice(0, limit) : filteredSales;
 
   return (
     <div>

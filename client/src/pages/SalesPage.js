@@ -22,12 +22,19 @@ const SalesPage = () => {
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setSales(data);
-        else setSales([]); // fallback if error or not array
+        else setSales([]);
+      })
+      .catch(err => {
+        console.error('Failed to fetch sales data:', err);
+        setSales([]);
       });
   }, [fetchProducts]);
 
   useEffect(() => {
     refreshData();
+    const handler = () => refreshData();
+    window.addEventListener('queueProcessed', handler);
+    return () => window.removeEventListener('queueProcessed', handler);
   }, [refreshData]);
 
   let expense = 0, income = 0;

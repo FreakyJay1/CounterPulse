@@ -11,6 +11,11 @@ const Sale = sequelize.define('Sale', {
     allowNull: false,
     defaultValue: DataTypes.NOW,
   },
+  clientId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true,
+  },
 });
 
 module.exports = Sale;

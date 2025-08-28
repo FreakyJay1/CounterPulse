@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import useProductStore from '../store/productStore';
 import { useUser } from '../utils/UserContext';
 import BarcodeScanner from './BarcodeScanner';
+import { queueAction } from '../utils/offlineQueue';
 
 const ProductEntry = ({ product, onSaved, onCancel }) => {
   const [name, setName] = useState('');
@@ -54,8 +55,14 @@ const ProductEntry = ({ product, onSaved, onCancel }) => {
           barcode,
           quantity: parseInt(quantity, 10)
         };
-        await updateProduct(updatePayload);
-        setSuccess('Product updated successfully!');
+        if (!navigator.onLine) {
+          queueAction({ type: 'EDIT_PRODUCT', payload: updatePayload });
+          updateProduct(updatePayload);
+          setSuccess('Product update queued (offline).');
+        } else {
+          await updateProduct(updatePayload);
+          setSuccess('Product updated successfully!');
+        }
       } else {
         const addPayload = {
           name,
@@ -65,8 +72,14 @@ const ProductEntry = ({ product, onSaved, onCancel }) => {
           barcode,
           quantity: parseInt(quantity, 10)
         };
-        await addProduct(addPayload);
-        setSuccess('Product added successfully!');
+        if (!navigator.onLine) {
+          queueAction({ type: 'ADD_PRODUCT', payload: addPayload });
+          addProduct(addPayload);
+          setSuccess('Product add queued (offline).');
+        } else {
+          await addProduct(addPayload);
+          setSuccess('Product added successfully!');
+        }
       }
       setTimeout(() => {
         if (onSaved) onSaved();

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useFeedback } from '../utils/FeedbackContext';
 import BarcodeScanner from './BarcodeScanner';
+import { queueAction } from '../utils/offlineQueue';
 
 const SalesEntry = ({ products, onSaleLogged, onCancel }) => {
   const [items, setItems] = useState([]); // { productId, quantity, total }
@@ -50,18 +51,34 @@ const SalesEntry = ({ products, onSaleLogged, onCancel }) => {
         return;
       }
     }
-    const res = await fetch('http://192.168.0.108:5000/api/sales', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: items.map(({ productId, quantity, total }) => ({ productId, quantity, total })) })
-    });
-    if (res.ok) {
+    const salePayload = { items: items.map(({ productId, quantity, total }) => ({ productId, quantity, total })) };
+    if (!navigator.onLine) {
+      const clientId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      queueAction({ type: 'LOG_SALE', payload: { ...salePayload, clientId } });
       setItems([]);
-      setMessage('Sale logged successfully!');
+      setMessage('Sale queued (offline).');
       if (onSaleLogged) onSaleLogged();
-    } else {
-      const data = await res.json();
-      setMessage(data.error || 'Failed to log sale.');
+      return;
+    }
+    try {
+      const res = await fetch('http://192.168.0.108:5000/api/sales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(salePayload)
+      });
+      if (res.ok) {
+        setItems([]);
+        setMessage('Sale logged successfully!');
+        if (onSaleLogged) onSaleLogged();
+      } else {
+        const data = await res.json();
+        setMessage(data.error || 'Failed to log sale.');
+      }
+    } catch (err) {
+      queueAction({ type: 'LOG_SALE', payload: salePayload });
+      setItems([]);
+      setMessage('Sale queued (offline due to network error).');
+      if (onSaleLogged) onSaleLogged();
     }
   };
 

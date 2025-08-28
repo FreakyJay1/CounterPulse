@@ -6,6 +6,7 @@ import { FeedbackProvider } from './utils/FeedbackContext';
 import AuthPage from './pages/AuthPage';
 import InventoryPage from './pages/InventoryPage';
 import NavBar from './components/NavBar';
+import { setupQueueSync } from './utils/offlineQueue';
 
 const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
 const SalesPage = React.lazy(() => import('./pages/SalesPage'));
@@ -48,6 +49,10 @@ function AppContent() {
 }
 
 export default function App() {
+  useEffect(() => {
+    setupQueueSync();
+  }, []);
+
   return (
     <UserProvider>
       <FeedbackProvider>
