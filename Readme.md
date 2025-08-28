@@ -39,7 +39,6 @@ A modern, pragmatic stack was chosen to deliver a fast, reliable, and accessible
 | **Frontend**  | ![React](https://img.shields.io/badge/-React-61DAFB?logo=react&logoColor=white)                                                                                            | Chosen for its powerful PWA capabilities (via Service Workers) to deliver the critical offline-first experience. |
 | **Backend**   | ![Node.js](https://img.shields.io/badge/-Node.js-339933?logo=node.js&logoColor=white) ![Express](https://img.shields.io/badge/-Express-000000?logo=express&logoColor=white) | Selected for its efficiency in building a lean REST API designed for syncing data from offline devices.    |
 | **Database**  | ![PostgreSQL](https://img.shields.io/badge/-PostgreSQL-4169E1?logo=postgresql&logoColor=white)                                                                           | A robust relational database chosen for its data integrity, reliability, and powerful querying capabilities.         |
-| **Mobile**    | ![Capacitor](https://img.shields.io/badge/-Capacitor-119EFF?logo=capacitor&logoColor=white)                                                                              | Used to package the PWA as a native mobile app for Android/iOS, enabling access to device features.                |
 
 ### **Local Setup & Installation**
 
