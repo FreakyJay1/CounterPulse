@@ -29,7 +29,7 @@ const InventoryPage = () => {
   const handleRemove = async (productId) => {
     if (window.confirm('Are you sure you want to remove this product?')) {
       try {
-        await axios.delete(`http://192.168.0.108:5000/api/products/${productId}`, {
+        await axios.delete(`http://localhost:5000/api/products/${productId}`, {
           headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
         });
         fetchProducts();

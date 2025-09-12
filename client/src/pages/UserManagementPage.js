@@ -17,7 +17,7 @@ const UserManagementPage = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('http://192.168.0.108:5000/api/users', {
+      const res = await fetch('http://localhost:5000/api/users', {
         headers: { Authorization: 'Bearer ' + localStorage.getItem('token') },
       });
       const data = await res.json();
@@ -39,7 +39,7 @@ const UserManagementPage = () => {
     setMessage('');
     setLoading(true);
     try {
-      const res = await fetch('http://192.168.0.108:5000/api/users/create-by-owner', {
+      const res = await fetch('http://localhost:5000/api/users/create-by-owner', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ const UserManagementPage = () => {
     setMessage('');
     setLoading(true);
     try {
-      const res = await fetch(`http://192.168.0.108:5000/api/users/${editingUser.id}`, {
+      const res = await fetch(`http://localhost:5000/api/users/${editingUser.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ const UserManagementPage = () => {
     setMessage('');
     setLoading(true);
     try {
-      const res = await fetch(`http://192.168.0.108:5000/api/users/${userId}`, {
+      const res = await fetch(`http://localhost:5000/api/users/${userId}`, {
         method: 'DELETE',
         headers: { Authorization: 'Bearer ' + localStorage.getItem('token') },
       });

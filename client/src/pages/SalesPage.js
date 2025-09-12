@@ -16,7 +16,7 @@ const SalesPage = () => {
     setProductsLoading(true);
     await fetchProducts();
     setProductsLoading(false);
-    fetch('http://192.168.0.108:5000/api/sales', {
+    fetch('http://localhost:5000/api/sales', {
       headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
     })
       .then(res => res.json())
